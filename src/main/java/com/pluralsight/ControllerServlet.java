@@ -19,27 +19,27 @@ import javax.inject.Inject;
  */
 
 public class ControllerServlet extends HttpServlet {
-		private static final long serialVersionUID = 1L;
-		private DBConnection dbConnection;
+	private static final long serialVersionUID = 1L;
+	private DBConnection dbConnection;
 
-		@Inject
-    private BookDAO bookDAO;
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
+	@Inject
+	private BookDAO bookDAO;
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
 
-    public void init() {
-			dbConnection = new DBConnection();
-			bookDAO = new BookDAO(dbConnection.getConnection());
-    }
+	public void init() {
+		dbConnection = new DBConnection();
+		bookDAO = new BookDAO(dbConnection.getConnection());
+	}
 
-		public void destroy() {
-			dbConnection.disconnect();
-		}
+	public void destroy() {
+		dbConnection.disconnect();
+	}
 
-    public ControllerServlet() {
-        super();
-    }
+	public ControllerServlet() {
+		super();
+	}
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,20 +50,25 @@ public class ControllerServlet extends HttpServlet {
 
 		try {
 			switch(action) {
-				case "/admin":
-					 showBookAdmin(request, response);
-           break;
-			  case "/new":
-					showNewForm(request, response);
-          break;
-				case "/insert":
-					insertBook(request, response);
-          break;
-				case "/delete":
-					deleteBook(request, response);
-        default:
-				   listBooks(request, response);
-           break;
+			case "/admin":
+				showBookAdmin(request, response);
+				break;
+			case "/new":
+				showNewForm(request, response);
+				break;
+			case "/insert":
+				insertBook(request, response);
+				break;
+			case "/delete":
+				deleteBook(request, response);
+				break;
+			case "/edit":
+				showEditForm(request, response);
+				break;
+
+			default:
+				listBooks(request, response);
+				break;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -106,13 +111,20 @@ public class ControllerServlet extends HttpServlet {
 		bookDAO.insertBook(newBook);
 		response.sendRedirect("list");
 	}
-	
+
 	private void deleteBook(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException { 
 		int id = Integer.parseInt(request.getParameter("id"));
 		bookDAO.deleteBook(id);
 		response.sendRedirect("list");
 	}
-			
+
+	private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Book book = bookDAO.getBook(Integer.parseInt(request.getParameter("id")));
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/BookForm.jsp");
+		request.setAttribute("book", book);
+		dispatcher.forward(request, response);
+	}
+
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
